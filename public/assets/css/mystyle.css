@@ -1,0 +1,18 @@
+*{
+	margin: 0px;
+	padding: 0px;
+}
+
+.btn_access_save{
+	float: right;
+	margin-left: 20px;
+}
+
+label.color_search{
+	color: black!important;
+}
+
+label{
+	color: black;
+}
+
