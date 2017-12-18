@@ -19,7 +19,9 @@ class CreateTimesheetTable extends Migration
             $table->integer('user_id');
             $table->string('punch_in')->nullable();
             $table->string('punch_out')->nullable();
-            $table->string('week_starting_date')->nullable(); 
+            $table->string('year')->nullable(); 
+            $table->string('week')->nullable(); 
+            $table->string('date')->nullable(); 
             $table->timestamps();
         });
     }

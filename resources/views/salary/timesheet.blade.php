@@ -1,3 +1,15 @@
+<?php 
+$week = date("W");
+$uid = Auth::User()->id;
+
+if (isset($_GET['uid'])) {
+    $uid = $_GET['uid'];
+}
+if (isset($_GET['week'])) {
+    $week = $_GET['week'];
+}
+
+?>
 @extends('layouts.app')
 @section('title','Bảng Chấm Công')
 @section('script')
@@ -9,17 +21,26 @@
 @endsection
 @section('styles')
 <style type="text/css">
-	.dataTables_scroll{
-    	border: 1px solid navajowhite;
-    	padding-top: 0px;
+
+    .dataTables_scroll{
+        border: 1px solid navajowhite;
+        padding-top: 0px;
     }
     table.dataTable {
-    	clear: both;
-    	margin-top: 0px!important;
+        clear: both;
+        margin-top: 0px!important;
     }
     td.highlight {
-    	background-color: whitesmoke !important;
-	}
+        background-color: whitesmoke !important;
+    }
+      ::-webkit-datetime-edit-second-field {
+    background: $color-white;
+    color: transparent;
+    margin-left: -3px;
+    position: absolute;
+    width: 1px;
+    -webkit-appearance: none; 
+  }
 }
 </style>
 @endsection
@@ -38,28 +59,120 @@
         <div class="col-lg-12">
             <div class="panel panel-blue">
                 <div class="panel-heading">
-                <form action="timekeeping" method="GET">
+                <form action="" method="GET">
                     <div class="caption">Bảng Chấm công <button type="submit" class="btn btn-info pull-right btn-sm" >Truy Cập</button>
-                    <select style="float: right; width: 40%; height: 29px; padding-top: 0px; margin-right: 5px;" name="month" id="inputMonth" class="pull-right form-control inline" required="required">
+                    <select style="float: right; width: auto; height: 29px; padding-top: 0px; margin-right: 5px;" name="week" id="inputMonth" class="pull-right form-control inline" required="required">
                         @for( $i=1; $i <= date('W'); $i++ )
                             <?php $i = str_pad($i, 2, '0', STR_PAD_LEFT); 
                             ?>
                             
-                            @if(date("W", strtotime(date("Y-m-d"))) == (int)$i )
-                                <option value="{{ $weeks[$i] }}">[Week: {{$i}}] -  {{ $weeks[$i] }}</option>
+                            @if($week == (int)$i )
+                                <option value="{{ $i }}" selected>[Week: {{$i}}] -  {{ $weeks[$i] }}</option>
                             @else
-                                <option style="background-color: #f1f1f1" value="{{ $weeks[$i] }}">[Week: {{$i}}] -  {{ $weeks[$i] }}</option>
+                                <option  value="{{ $i }}">[Week: {{$i}}] -  {{ $weeks[$i] }}</option>
                             @endif
                         @endfor
                     </select>
+                    <select name="uid" style="float: right; width: auto; height: 29px; padding-top: 0px; margin-right: 5px;"  class="pull-right form-control inline" required="required" >
+                        @foreach($users as $user)
+                            @if($uid == $user->id)
+                                <option value="{{ $user->id }}" selected>{{ $user->name }}</option>
+                            @else
+                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            @endif
+                        @endforeach
+                    </select>
+                    </div>
+                </form>
                 </div>
-            </form>
+            </div>
+            <div class="panel-body">
+                <div class="row mbm">
+                    <div class="col-lg-12">
+                        <form action="/timesheet" method="POST">
+                        <input type="hidden" name="user_id" value="{{$uid}}">
+                        <table id="timesheetTable" class="table table-hover table-striped  table-advanced tablesorter display nowrap" cellspacing="0" style="overflow-y: scroll; ">
+                            <thead>
+                                <tr>
+                                 <?php 
+                                    $gendate = new DateTime();
+                                    $date = array('Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'); 
+                                    for ($i=1; $i <= 7; $i++) { 
+                                        ?>
+                                        <th style="text-align: left!important; ">
+                                        <?php
+                                        $gendate->setISODate(date('Y'),$week, $i); 
+                                        echo $date[$i - 1] . " (" . $gendate->format('d-m-Y') . ")";  
+                                        ?>
+                                    </th>
+                                         
+                                 <?php
+                                    }                                    
+                                 ?>
+                             </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                               
+                                @for($i = 1; $i <= 7; $i++)
+                                <?php
+                                    $gendate->setISODate(date('Y'),$week, $i);
+                                ?>
+                                    @foreach($ts_data as $ts)
+                                    @if($gendate->format('d') == date('d'))
+                                        <td><a data-toggle="modal" href='#modal-ts' class="modal-ts" style="color: red" data-punch_in="{{date("H:i", strtotime("$ts->punch_in"))}}" data-punch_out="{{date("H:i", strtotime("$ts->punch_out"))}}" data-thu="{{$i}}"><b>{{$ts->punch_in}}</b> / <b>{{$ts->punch_out}}</b></a></td>
+                                    @else
+                                        @if($gendate->format('d') > date('d'))
+                                             <td><i>none</i></td> 
+                                        @else
+                                            <td><a data-toggle="modal" href='#modal-ts' class="modal-ts" style="color: red" data-punch_in="{{date("H:i", strtotime("$ts->punch_in"))}}" data-punch_out="{{date("H:i", strtotime("$ts->punch_out"))}}" data-thu="{{$i}}"><b>{{$ts->punch_in}}</b> / <b>{{$ts->punch_out}}</b></a></td>
+                                        @endif
+                                         
+                                    @endif
+                                    @endforeach
+                                     
+                                @endfor
+                              </tr>
+                            </tbody>
+                        </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 </div>
-</div>
-</div>
 
+<div class="modal fade" id="modal-ts">
+    <form action="timesheet/store" method="POST">
+       <input type="hidden" name="_token" value="{{ csrf_token() }}">
+       <input type="hidden" name="week" value="{{$week}}">
+       <input type="hidden" name="user_id" value="{{$uid}}">
+       <input type="hidden" name="thu" id="thu" value="">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Chấm Công</h4>
+            </div>
+            <div class="modal-body">
+               <div class="row">
+                   <div class="col-md-6">
+                       Punch In : <input type="time" name="punch_in" value="">
+                   </div>
+                   <div class="col-md-6">
+                       Punch Out : <input type="time" name="punch_out" value="">
+                   </div>
+               </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" >Save changes</button>
+            </div>
+        </div>
+    </div>
+    </form>
+</div>
 
 @endsection

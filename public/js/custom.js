@@ -17,4 +17,9 @@ $( document ).ready(function() {
 		$("#rel-rel").val(rel);
 	});
 
+	$('.modal-ts').on('click', function(){
+		 $('input[name="thu"]').val($(this).data('thu'));
+		 $('input[name="punch_in"]').val($(this).attr('data-punch_in'));
+		 $('input[name="punch_out"]').val($(this).attr('data-punch_out'));
+	});
 });

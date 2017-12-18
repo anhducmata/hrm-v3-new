@@ -88,7 +88,8 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('/timekeeping', 'TimekeepingController@index');
 	Route::post('/timekeeping/store', 'TimekeepingController@store');
 
-	Route::get('/timesheet', 'TimesheetController@index');
+	Route::get('timesheet', 'TimesheetController@index');
+	Route::post('timesheet/store', 'TimesheetController@store');
 
 
 	//Route::get('/timekeeping', 'SalaryController@timekeeping');

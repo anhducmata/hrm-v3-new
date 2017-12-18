@@ -16,10 +16,12 @@ class TimekeepingController extends Controller
             if (!empty($_GET['month']) && !empty($_GET['year'])) {
                 $req         = $_GET['month'].$_GET['year'];
                 $tk_db       = Timekeeping::where('name',$req)->first();
+
                 if ($tk_db) {
                     $tk_content  = $tk_db->content;
                     $tk_user_ids = $tk_db->user_ids;
                     $tk_date     = $tk_db->date;
+                    var_dump($tk_content);
                     return view('salary.timekeeping', compact('users','tk_content','tk_user_ids','tk_date'));
                 }
                 
