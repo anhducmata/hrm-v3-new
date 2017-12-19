@@ -124,7 +124,7 @@ class SalaryController extends Controller
     	return $Salary_No_Ins_val + $Salary_With_Ins_val + (int)$base_salary;
     }
     public static function getRealSalary($user_id, $month){
-    	return SalaryController::getTotalSalary($user_id)*((int)TimekeepingController::getDW($user_id, $month)/26);
+    	return SalaryController::getTotalSalary($user_id)*((int)TimesheetController::getDW($user_id, $month)/22);
     }
     public static function getPersonalIncomeWithInsurrance($user_id){
     	return (int)(SalaryController::getTotalSalary($user_id) - SalaryController::getTotalSalaryAllowanceWithoutInsurrance($user_id,true));

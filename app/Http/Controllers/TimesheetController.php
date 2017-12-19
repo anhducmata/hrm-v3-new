@@ -7,8 +7,10 @@ use App\Timekeeping;
 use App\User;
 use App\TimeSheet;
 use Auth;
+use DateTime;
 class TimesheetController extends Controller
 {
+
 	public function index(){
 		$weeks = $this->weeks();
 		$users = User::All();
@@ -31,8 +33,12 @@ class TimesheetController extends Controller
 		$time_out = $_POST["punch_out"];
 		$thu = $_POST["thu"];
 		$year = date("Y");
-		$week = date("W");
+		$week = $_POST["week"];
 		$ts_check = TimeSheet::where('year', $year)->where('week', $week)->where('date', $thu)->first();
+		
+		if (self::getTimeDiff($time_in, $time_out) < 0) {
+			return  redirect()->back()->with('msg','Timesheet Error.'); 
+		}
 		if (is_null($ts_check)) {
 			$ts = new TimeSheet;
 			$ts->user_id = $user_id;
@@ -51,6 +57,7 @@ class TimesheetController extends Controller
 			$ts_check->date = $thu;
 			$ts_check->save();
 		}
+		 return  redirect()->back()->with('msg','Đã cập nhật.'); 
 		
 	}
 
@@ -87,5 +94,24 @@ class TimesheetController extends Controller
 	        if(strlen($mins)<2){$mins="0".$mins;}
 	        if(strlen($secs)<2){$secs="0".$secs;}
 	        return $hours + $mins/60;
-	    }
+	}
+
+	public static function getDW($user_id, $month_and_year){
+		$year = substr($month_and_year, -4);
+		$month = substr($month_and_year, 0, 2);
+		$out = 0;
+		$number_day = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+		for ($i=1; $i <= $number_day ; $i++) { 
+			$d_date = new DateTime($i.'-'.$month.'-'.$year);
+			$d_week = $d_date->format("W");
+			$d_date = $d_date->format("N");
+			$record = TimeSheet::Where('user_id', $user_id)->Where('date', $d_date)->Where('week', $d_week)->Where('year', $year)->first();
+			if ($record != null) {
+				$out += self::getTimeDiff($record->punch_in, $record->punch_out);
+			}
+			
+		}
+		return $out/8;
+	}
+
 }

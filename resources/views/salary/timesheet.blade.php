@@ -88,6 +88,12 @@ if (isset($_GET['week'])) {
             </div>
             <div class="panel-body">
                 <div class="row mbm">
+                       @if(Session::has('msg'))
+                                <div class="alert alert-info">
+                                    <a class="close" data-dismiss="alert">×</a>
+                                    <strong>Chú ý! </strong> {!!Session::get('msg')!!}
+                                </div>
+                                @endif
                     <div class="col-lg-12">
                         <form action="/timesheet" method="POST">
                         <input type="hidden" name="user_id" value="{{$uid}}">
@@ -96,13 +102,13 @@ if (isset($_GET['week'])) {
                                 <tr>
                                  <?php 
                                     $gendate = new DateTime();
-                                    $date = array('Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'); 
-                                    for ($i=1; $i <= 7; $i++) { 
+                                    $date = array('Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'); 
+                                    for ($i=1; $i <= 6; $i++) { 
                                         ?>
                                         <th style="text-align: left!important; ">
                                         <?php
-                                        $gendate->setISODate(date('Y'),$week, $i); 
-                                        echo $date[$i - 1] . " (" . $gendate->format('d-m-Y') . ")";  
+                                            $gendate->setISODate(date('Y'),$week, $i); 
+                                            echo $date[$i - 1] . " (" . $gendate->format('d-m-Y') . ")";  
                                         ?>
                                     </th>
                                          
@@ -113,29 +119,38 @@ if (isset($_GET['week'])) {
                             </thead>
                             <tbody>
                               <tr>
-                               
-                                @for($i = 1; $i <= 7; $i++)
-                                <?php
-                                    $gendate->setISODate(date('Y'),$week, $i);
-                                ?>
+                              
+                                @for($i = 1; $i <= 6; $i++)
+                                 <?php 
+                                    $no_break = true;
+                                    ?>
+                                    <?php
+                                        $gendate->setISODate(date('Y'),$week, $i);
+                                    ?>
                                     @foreach($ts_data as $ts)
-                                    @if($gendate->format('d') == date('d'))
-                                        <td><a data-toggle="modal" href='#modal-ts' class="modal-ts" style="color: red" data-punch_in="{{date("H:i", strtotime("$ts->punch_in"))}}" data-punch_out="{{date("H:i", strtotime("$ts->punch_out"))}}" data-thu="{{$i}}"><b>{{$ts->punch_in}}</b> / <b>{{$ts->punch_out}}</b></a></td>
-                                    @else
-                                        @if($gendate->format('d') > date('d'))
-                                             <td><i>none</i></td> 
-                                        @else
-                                            <td><a data-toggle="modal" href='#modal-ts' class="modal-ts" style="color: red" data-punch_in="{{date("H:i", strtotime("$ts->punch_in"))}}" data-punch_out="{{date("H:i", strtotime("$ts->punch_out"))}}" data-thu="{{$i}}"><b>{{$ts->punch_in}}</b> / <b>{{$ts->punch_out}}</b></a></td>
+                                        @if($ts->date == $i)
+                                            <td><a data-toggle="modal" href='#modal-ts' class="modal-ts" style="color: green" 
+                                            data-punch_in="{{date("H:i", strtotime($ts->punch_in))}}" 
+                                            data-punch_out="{{date("H:i", strtotime($ts->punch_out))}}" 
+                                            data-thu="{{$i}}"><b>{{$ts->punch_in}}</b> / <b>{{$ts->punch_out}}</b></a></td>
+                                        <?php 
+                                            $no_break = false;
+                                        ?>
                                         @endif
-                                         
-                                    @endif
                                     @endforeach
-                                     
+                                    <?php 
+                                        if ($no_break == true) { ?>
+                                            <td>none</td>
+                                        <?php }
+                                    ?>
                                 @endfor
                               </tr>
                             </tbody>
+                           
                         </table>
                         </form>
+                         <a class="btn btn-primary" data-toggle="modal" href='#modal-ts' class="modal-ts" 
+                                    data-thu="{{$i}}"><b>Submit</b></a>
                     </div>
                 </div>
             </div>
@@ -149,7 +164,7 @@ if (isset($_GET['week'])) {
        <input type="hidden" name="_token" value="{{ csrf_token() }}">
        <input type="hidden" name="week" value="{{$week}}">
        <input type="hidden" name="user_id" value="{{$uid}}">
-       <input type="hidden" name="thu" id="thu" value="">
+       
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -157,12 +172,24 @@ if (isset($_GET['week'])) {
                 <h4 class="modal-title">Chấm Công</h4>
             </div>
             <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Ngày</h3>
+                       <select name="thu" class="form-control">
+                        @for($i =1; $i<=6; $i++)
+                            <option value="{{$i}}">Thứ {{$i+1}}</option>
+                        @endfor
+                       </select>
+                   </div>
+                </div>
                <div class="row">
+                
+                    
                    <div class="col-md-6">
-                       Punch In : <input type="time" name="punch_in" value="">
+                       <h3>Punch In</h3> <input type="time" name="punch_in" value="" class="form-control">
                    </div>
                    <div class="col-md-6">
-                       Punch Out : <input type="time" name="punch_out" value="">
+                       <h3>Punch Out</h3> <input type="time" name="punch_out" value="" class="form-control">
                    </div>
                </div>
             </div>

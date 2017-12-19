@@ -1,6 +1,6 @@
 <?php 
 use App\Http\Controllers\SalaryController;
-use App\Http\Controllers\TimekeepingController;
+use App\Http\Controllers\TimesheetController;
 
 $my = '';
 if (isset($_GET['monthSelect'])) {
@@ -136,7 +136,7 @@ $year = mb_substr($my, 2);
 										@endfor
 										{{-- End Phụ cấp --}}
 	                                		<td >{{ number_format(SalaryController::getTotalSalary($value['id'])) }}</td>
-	                                		<td>{{TimekeepingController::getDW($value['id'], $my)}}</td>
+	                                		<td>{{ TimesheetController::getDW($value['id'], $my)}}</td>
 	                                		<td> <?php $real_salary = SalaryController::getRealSalary($value['id'], $my);
 	                                				echo number_format($real_salary);
 	                                		?></td>
@@ -158,7 +158,7 @@ $year = mb_substr($my, 2);
 	                                		?>
 	                                		</td>
 	                                		<td>{{ number_format($tntt * 0.05)  }}</td>
-	                                		<td>{{number_format($real_salary - 0.105*SalaryController::getSalaryForInsurrance($value['id']) - $tntt * 0.05 )}} {{number_format($real_salary - 0.105*SalaryController::getSalaryForInsurrance($value['id']) - $tntt * 0.05 )>0?number_format($real_salary - 0.105*SalaryController::getSalaryForInsurrance($value['id']) - $tntt * 0.05 ):0 }}</td>
+	                                		<td> {{number_format($real_salary - 0.105*SalaryController::getSalaryForInsurrance($value['id']) - $tntt * 0.05 )>0?number_format($real_salary - 0.105*SalaryController::getSalaryForInsurrance($value['id']) - $tntt * 0.05 ):0 }}</td>
 		                                </tr>                                	     
 	                                <?php } ?>                           
 	                                </tbody>
